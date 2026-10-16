@@ -1,0 +1,27 @@
+{
+  "passed": 19,
+  "checks": [
+    "Both clients negotiated protocol v1",
+    "Initial state is running",
+    "Guest cannot pause, even on loopback",
+    "Real simulation and world clock advance before pause",
+    "Host pauses both clients",
+    "Server simulation is paused",
+    "Stale requests and forged state cannot resume",
+    "World tick, clock, NPC, projectile, player position, HP and respawn timer stay frozen",
+    "Guest cannot resume",
+    "New joins receive a clear paused-server message",
+    "125-second pause freezes simulation without disconnecting either client",
+    "State heartbeats continue throughout pause",
+    "Host resumes both clients",
+    "Real world simulation resumes",
+    "Mixed patched/unpatched sessions reject pause safely",
+    "Pause works again after unpatched guest disconnects",
+    "Host disconnect automatically releases pause",
+    "A solo host can pause",
+    "Empty paused server accepts the next connection after solo host leaves"
+  ],
+  "server": "Terraria Linux 1.4.5.8",
+  "clients": "two independent TCP protocol clients",
+  "long_pause_seconds": 125
+}

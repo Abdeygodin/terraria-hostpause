@@ -1,0 +1,7 @@
+Joining isolated test server
+PRESS F9: pause at frame 1264
+Pause received at frame 1267
+Draw state: hideUI=False main=1152x864 overlays=5929
+Captured pause-client.png
+PASS: actual FNA client simulation frozen; PRESS F9: resume
+PASS: actual F9 resumed client simulation; captured=True

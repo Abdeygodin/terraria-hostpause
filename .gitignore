@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+source/build/
+__pycache__/
+*.pyc
+*.plr
+*.wld
+*.bak
+*.pdb
+Terraria.exe
+TerrariaServer.exe
+HostPause.install.json
+HostPause.backups/
