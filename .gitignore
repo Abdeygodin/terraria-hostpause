@@ -11,3 +11,4 @@ Terraria.exe
 TerrariaServer.exe
 HostPause.install.json
 HostPause.backups/
+HostPause.log*

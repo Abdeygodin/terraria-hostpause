@@ -1,7 +1,7 @@
 {
-  "passed": 19,
+  "passed": 20,
   "checks": [
-    "Both clients negotiated protocol v1",
+    "Both clients negotiated protocol v2",
     "Initial state is running",
     "Guest cannot pause, even on loopback",
     "Real simulation and world clock advance before pause",
@@ -16,6 +16,7 @@
     "Host resumes both clients",
     "Real world simulation resumes",
     "Mixed patched/unpatched sessions reject pause safely",
+    "Old protocol v1 runtimes cannot silently join a v2 pause",
     "Pause works again after unpatched guest disconnects",
     "Host disconnect automatically releases pause",
     "A solo host can pause",

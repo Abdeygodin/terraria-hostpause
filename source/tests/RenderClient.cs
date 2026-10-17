@@ -13,6 +13,9 @@ public static class HostPauseRenderClient
     static uint frozenTick;
     static double frozenTime;
     static long started;
+    static readonly bool guest = Environment.GetEnvironmentVariable("HOSTPAUSE_RENDER_ROLE") == "guest";
+    static readonly bool injectCaptureFailure = Environment.GetEnvironmentVariable("HOSTPAUSE_TEST_CAPTURE_FAILURE") == "1";
+    static bool failureInjected;
 
     public static void BeforeGame()
     {
@@ -42,7 +45,7 @@ public static class HostPauseRenderClient
             data.SetAsActive();
             Netplay.SetRemoteIP("127.0.0.1");
             Netplay.ListenPort = 17777;
-            Netplay.HostToken = "HostPause-Isolated-Test";
+            Netplay.HostToken = guest ? null : "HostPause-Isolated-Test";
             Main.StartClientGameplay();
             Log("Joining isolated test server");
         }
@@ -54,24 +57,32 @@ public static class HostPauseRenderClient
         if (Main.gameMenu || Main.netMode != 1 || Netplay.Connection.State != 10) return;
         connectedFrames++;
         bool press = false;
-        if (!requested && connectedFrames == 120) { requested = true; press = true; Log("PRESS F9: pause at frame " + frames); }
+        if (!guest && !requested && connectedFrames == 120) { requested = true; press = true; Log("PRESS F9: pause at frame " + frames); }
         if (HostPause.Runtime.IsPaused)
         {
             pausedFrames++;
+            if (injectCaptureFailure && !failureInjected)
+            {
+                failureInjected = true;
+                typeof(HostPause.Visuals).GetField("textureType", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic).SetValue(null, null);
+                Log("Injected screenshot failure on the graphical guest");
+            }
             if (pausedFrames == 1) Log("Pause received at frame " + frames);
             if (pausedFrames == 20) { frozenTick = Main.GameUpdateCount; frozenTime = Main.time; }
             if (pausedFrames == 150)
             {
                 if (Main.GameUpdateCount != frozenTick || Main.time != frozenTime) throw new Exception("Client simulation moved during pause");
-                press = true;
-                Log("PASS: actual FNA client simulation frozen; PRESS F9: resume");
+                press = !guest;
+                if (guest) File.WriteAllText("../test-data/guest-frozen.signal", "frozen");
+                Log(guest ? "PASS: graphical guest simulation frozen despite screenshot failure" : "PASS: actual FNA client simulation frozen; PRESS F9: resume");
             }
         }
         else if (pausedFrames > 0 && ++resumedFrames == 60 && !done)
         {
             done = true;
+            if (guest && pausedFrames < 150) throw new Exception("Guest resumed locally before authoritative resume");
             if (Main.GameUpdateCount == frozenTick) throw new Exception("Client did not resume");
-            Log("PASS: actual F9 resumed client simulation; captured=" + captured);
+            Log(guest ? "PASS: server resume reached graphical guest after screenshot failure" : "PASS: actual F9 resumed client simulation; captured=" + captured);
             Main.instance.Exit();
         }
         Main.keyState = press ? new KeyboardState(Keys.F9) : new KeyboardState();
@@ -90,12 +101,12 @@ public static class HostPauseRenderClient
         using (var image = new Texture2D(device, width, height))
         {
             image.SetData(pixels);
-            using (var stream = File.Create("../test-data/pause-client.png")) image.SaveAsPng(stream, width, height);
+            using (var stream = File.Create(guest ? "../test-data/guest-pause-client.png" : "../test-data/pause-client.png")) image.SaveAsPng(stream, width, height);
         }
         Log("Captured pause-client.png");
     }
 
     public static void OnOverlay() { overlays++; }
 
-    static void Log(string message) { File.AppendAllText("../test-data/render-test.log", message + "\n"); }
+    static void Log(string message) { File.AppendAllText(guest ? "../test-data/guest-render-test.log" : "../test-data/render-test.log", message + "\n"); }
 }

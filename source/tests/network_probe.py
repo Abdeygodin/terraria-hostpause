@@ -66,7 +66,7 @@ class Client:
         self.sock.sendall(struct.pack('<HB', len(payload)+3, kind)+payload)
 
     def pause(self, op, value=0, revision=None):
-        self.send(254, b'HPZ1'+bytes([1, op, value])+struct.pack('<I', self.revision if revision is None else revision))
+        self.send(254, b'HPZ1'+bytes([2, op, value])+struct.pack('<I', self.revision if revision is None else revision))
 
     def read(self):
         try:
@@ -86,7 +86,7 @@ class Client:
             self.buf = self.buf[length:]
             self.counts[kind] += 1
             packets.append((kind, body))
-            if kind == 254 and body[:5] == b'HPZ1\x01':
+            if kind == 254 and body[:5] == b'HPZ1\x02':
                 op, value, revision = struct.unpack('<BBI', body[5:])
                 if op == 2:
                     self.revision = revision

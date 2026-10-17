@@ -44,6 +44,27 @@ namespace HostPause
             throw new MissingMethodException(type.FullName, name);
         }
 
+        internal static void ReadBackBuffer(object device, byte[] pixels)
+        {
+            // XNA 4 Reach blocks readback in managed code even though its D3D9
+            // implementation can perform it. Terraria itself adjusts profile
+            // capabilities for large textures. Lift just this readback guard,
+            // scoped to this call; do not change the graphics profile or settings.
+            FieldInfo capabilitiesField = device.GetType().GetField("_profileCapabilities", Flags);
+            object capabilities = capabilitiesField == null ? null : capabilitiesField.GetValue(device);
+            FieldInfo permission = capabilities == null ? null : capabilities.GetType().GetField("GetBackBufferData", Flags);
+            bool restore = permission != null && !(bool)permission.GetValue(capabilities);
+            try
+            {
+                if (restore) permission.SetValue(capabilities, true);
+                ArrayMethod(device.GetType(), "GetBackBufferData").Invoke(device, new object[] { pixels });
+            }
+            finally
+            {
+                if (restore) permission.SetValue(capabilities, false);
+            }
+        }
+
         public static void Reset()
         {
             if (frozen != null) { ((IDisposable)frozen).Dispose(); frozen = null; }
@@ -68,7 +89,7 @@ namespace HostPause
             if (frozen == null)
             {
                 byte[] pixels = new byte[checked(width * height * 4)];
-                ArrayMethod(device.GetType(), "GetBackBufferData").Invoke(device, new object[] { pixels });
+                ReadBackBuffer(device, pixels);
                 for (int i = 0; i < pixels.Length; i += 4)
                 {
                     byte gray = (byte)(((pixels[i] * 54 + pixels[i + 1] * 183 + pixels[i + 2] * 19) >> 8) * 0.70);

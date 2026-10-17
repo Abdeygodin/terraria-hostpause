@@ -1,0 +1,7 @@
+Joining isolated test server
+Injected screenshot failure on the graphical guest
+Pause received at frame 962
+Draw state: hideUI=False main=1152x864 overlays=982
+Captured pause-client.png
+PASS: graphical guest simulation frozen despite screenshot failure
+PASS: server resume reached graphical guest after screenshot failure

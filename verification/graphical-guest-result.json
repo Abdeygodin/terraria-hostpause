@@ -1,0 +1,6 @@
+{
+  "graphical_guest_capture_failure_injected": true,
+  "guest_simulation_frozen": true,
+  "server_resume_received": true,
+  "platform": "actual Linux FNA graphical client; controlled capture failure"
+}

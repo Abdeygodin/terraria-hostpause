@@ -8,7 +8,7 @@ namespace HostPause
     // Deliberately depends only on mscorlib. FNA and XNA clients use the same protocol.
     public static class Runtime
     {
-        const byte PacketId = 254, Protocol = 1, Hello = 1, State = 2, Request = 3, Denied = 4;
+        const byte PacketId = 254, Protocol = 2, Hello = 1, State = 2, Request = 3, Denied = 4;
         const int PacketLength = 14;
         static readonly BindingFlags Flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance;
         static Type main, netplay, message;
@@ -16,15 +16,27 @@ namespace HostPause
         static object[] peerSockets = new object[256];
         static bool[] compatible = new bool[256];
         static long[] lastRequests = new long[256];
-        static bool paused, ready, wasDown, announced, faulted;
+        static bool paused, ready, wasDown, announced, faulted, visualFaulted;
+        static readonly object logLock = new object();
         static int previousMode = -1;
         static uint revision;
         static long nextHello, nextHeartbeat, nextNotice;
         static string keyName = "F9";
         static object key;
-        static MethodInfo keyDown, drawText;
+        static MethodInfo keyDown;
 
         public static bool IsPaused { get { return paused; } }
+
+        // Rendering is optional. A GPU/readback failure must not resume client gameplay
+        // while the authoritative server and other clients remain frozen.
+        static void VisualFault(Exception ex)
+        {
+            if (visualFaulted) return;
+            visualFaulted = true;
+            Log("Pause visuals disabled; simulation and network pause remain active: " + ex);
+            try { Visuals.Reset(); } catch { }
+            try { Notice("HostPause: ошибка эффектов паузы. Пауза мира продолжает работать; подробности в HostPause.log."); } catch { }
+        }
 
         // A broken patch must never crash the game or leave the server stuck on pause.
         static void Fault(Exception ex)
@@ -56,10 +68,10 @@ namespace HostPause
                 if (File.Exists(config)) keyName = File.ReadAllText(config).Trim();
                 try { key = Enum.Parse(keys, keyName, true); }
                 catch { keyName = "F9"; key = Enum.Parse(keys, keyName); }
-                drawText = assembly.GetType("Terraria.Utils").GetMethod("DrawBorderString", Flags);
-                Visuals.Init(main);
+                try { Visuals.Init(main); }
+                catch (Exception ex) { VisualFault(ex); }
             }
-            Log("HostPause 0.1 loaded; key=" + keyName);
+            Log("HostPause 0.1.2 loaded; protocol=" + Protocol + "; key=" + keyName);
         }
 
         static FieldInfo Field(Type type, string name)
@@ -161,7 +173,7 @@ namespace HostPause
                 if (down && !wasDown && (!blocked || paused))
                 {
                     if (mode == 0) ChangeState(!paused, "single player");
-                    else if (!ready) Notice("HostPause: сервер ещё не подтвердил поддержку патча.");
+                    else if (!ready) Notice("HostPause: сервер не подтвердил версию 0.1.2. Обновите патч у хоста и всех игроков.");
                     else Send(-1, Request, (byte)(paused ? 0 : 1));
                 }
                 wasDown = down;
@@ -213,6 +225,7 @@ namespace HostPause
                 {
                     if (op == Hello)
                     {
+                        if (!compatible[sender]) Log("Negotiated protocol=" + Protocol + " slot=" + sender + " transport=" + Socket(sender).GetType().Name);
                         compatible[sender] = true;
                         peerSockets[sender] = Socket(sender);
                         Send(sender, State, (byte)(paused ? 1 : 0));
@@ -247,14 +260,15 @@ namespace HostPause
                         ready = true;
                         if (changed)
                         {
+                            Log("Client received " + (paused ? "PAUSED" : "RUNNING") + " revision=" + revision);
                             if (paused) Notice("ПАУЗА. Хост может продолжить игру клавишей " + keyName + ".");
-                            else if (!announced) Notice("HostPause готов. Клавиша паузы у хоста: " + keyName + ".");
+                            else if (!announced) Notice("HostPause 0.1.2 готов. Клавиша паузы у хоста: " + keyName + ".");
                             else Notice("Игра продолжена.");
                             announced = true;
                         }
                     }
                     else if (op == Denied)
-                        Notice(value == 1 ? "Пауза доступна только хосту." : "Патч HostPause нужен всем игрокам; дождитесь окончания подключения.");
+                        Notice(value == 1 ? "Пауза доступна только хосту." : "HostPause 0.1.2 нужен всем игрокам; дождитесь окончания подключения.");
                 }
                 return true;
             }
@@ -347,25 +361,40 @@ namespace HostPause
 
         public static bool DrawFrozenFrame()
         {
-            if (faulted || !paused || main == null || Get<bool>(main, "dedServ") || Get<bool>(main, "gameMenu")) return false;
+            if (faulted || visualFaulted || !paused || main == null || Get<bool>(main, "dedServ") || Get<bool>(main, "gameMenu")) return false;
             try { return Visuals.DrawCached(keyName); }
-            catch (Exception ex) { Fault(ex); return false; }
+            catch (Exception ex) { VisualFault(ex); return false; }
         }
 
         public static void AfterDraw()
         {
-            if (faulted || main == null || Get<bool>(main, "dedServ")) return;
+            if (faulted || visualFaulted || main == null || Get<bool>(main, "dedServ")) return;
             try
             {
                 if (paused && !Get<bool>(main, "gameMenu")) Visuals.CaptureAndDraw(keyName);
                 else Visuals.Reset();
             }
-            catch (Exception ex) { Fault(ex); }
+            catch (Exception ex) { VisualFault(ex); }
         }
 
         static void Log(string text)
         {
             Console.WriteLine("[HostPause] " + text);
+            try
+            {
+                if (main == null) return;
+                string path = Path.Combine(Path.GetDirectoryName(main.Assembly.Location), "HostPause.log");
+                lock (logLock)
+                {
+                    if (File.Exists(path) && new FileInfo(path).Length > 1024 * 1024)
+                    {
+                        if (File.Exists(path + ".1")) File.Delete(path + ".1");
+                        File.Move(path, path + ".1");
+                    }
+                    File.AppendAllText(path, DateTime.UtcNow.ToString("o") + " " + text + Environment.NewLine);
+                }
+            }
+            catch { }
         }
     }
 }

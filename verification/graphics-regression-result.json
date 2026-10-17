@@ -1,0 +1,12 @@
+{
+  "passed": 7,
+  "checks": [
+    "XNA Reach readback guard is lifted only for the readback call and restored",
+    "XNA Reach capability is restored even when the GPU readback throws",
+    "A graphical capture failure never resumes a network client",
+    "Simulation gate remains closed after a graphical failure",
+    "Disabling visuals leaves authoritative pause active",
+    "Server resume packets still work after a graphical failure",
+    "Simulation gate opens after the server resumes"
+  ]
+}

@@ -1,1 +1,1 @@
-6778afa9deb235fa47cd42133971685efabb1e36629da7a950a6ef4f11a05dae  HostPause-0.1.1.zip
+c424aca062eb7e974d07f20745a51a08bd28aec1b6b07a01ce3e1bcb06fa7daf  HostPause-0.1.2.zip
