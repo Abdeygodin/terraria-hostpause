@@ -11,15 +11,33 @@ and a centered pause banner. It does not require tModLoader.
 
 ## Status
 
-**Experimental prerelease, version 0.1.0.** Tested with the native Linux Steam
+**Experimental prerelease, version 0.1.1.** Tested with the native Linux Steam
 Flatpak game, an actual graphical FNA client, and a dedicated TCP server.
 The Windows x64 installer is built, but Windows gameplay and Steam friend
 connections have not been tested. Other Terraria versions are unsupported.
 
+## Windows installer fix in 0.1.1
+
+Fixes `Failed to resolve assembly: Microsoft.Xna.Framework.Graphics` during
+installation. The patcher now probes the Windows .NET Framework directories and
+both legacy and modern GAC layouts, checking assembly identities. No system
+assemblies are copied into the game or bundled with this release.
+
+The original error was reproduced with the official Windows 1.4.5.8 server.
+Ten regression checks passed on Linux using a simulated Windows GAC and Wine
+Mono XNA facades, including successful patching of that server and byte-identical
+Linux outputs. This is not a live Windows gameplay test.
+
+If 0.1.0 failed with this error, extract the new archive into a separate directory
+and run `Install-Windows.cmd` again. There is no installed patch to remove after
+that staging failure. If 0.1.0 installed successfully, uninstall it before updating.
+The gameplay runtime and network protocol are unchanged; existing Linux players
+do not need to reinstall for this installer fix.
+
 ## Install and play
 
 1. Everyone saves and fully closes Terraria and its server.
-2. Download `HostPause-0.1.0.zip` from Releases and extract it.
+2. Download `HostPause-0.1.1.zip` from Releases and extract it.
 3. Each player installs the patch: run `Install-Windows.cmd` on Windows or
    `bash Install-Linux.sh` on Linux.
 4. Start Terraria through Steam as usual. The host starts a Host & Play session;
@@ -93,6 +111,10 @@ patched/unpatched clients, host exit, and reconnecting after an empty paused
 session. `verification/render-test.log` records F9 pause/resume in the actual FNA
 client; the screenshot above comes from that run. Installation and removal were
 also checked on an isolated copy of the game files.
+
+`verification/resolver-result.json` records the installer dependency regression
+checks, and `verification/installer-0.1.1-result.json` records the self-contained
+Linux installer and byte-exact rollback check.
 
 The source tests use isolated game copies and a synthetic localhost test host
 token. They must not be run against a live player session.

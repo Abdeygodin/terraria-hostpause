@@ -20,10 +20,16 @@ static class Program
             Prepare(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]));
             return 0;
         }
+        catch (AssemblyResolutionException ex) when (ex.AssemblyReference.Name.StartsWith("Microsoft.Xna.Framework", StringComparison.Ordinal))
+        {
+            Console.Error.WriteLine("Не найдена сборка XNA: " + ex.AssemblyReference.FullName +
+                "\nПроверены папка игры и системное хранилище сборок Windows. Если сама Terraria тоже не запускается, восстановите компоненты XNA 4.0 через Steam.");
+            return 1;
+        }
         catch (Exception ex) { Console.Error.WriteLine(ex.Message); return 1; }
     }
 
-    internal static void Prepare(string game, string output)
+    internal static void Prepare(string game, string output, string? windowsDirectory = null)
     {
         if (game.TrimEnd(Path.DirectorySeparatorChar) == output.TrimEnd(Path.DirectorySeparatorChar))
             throw new Exception("Use a separate staging directory; original files are never patched in place.");
@@ -31,9 +37,7 @@ static class Program
         string runtimePath = Path.Combine(AppContext.BaseDirectory, "HostPause.Runtime.dll");
         using var runtime = ModuleDefinition.ReadModule(runtimePath);
         var type = runtime.GetType("HostPause.Runtime");
-        var resolver = new DefaultAssemblyResolver();
-        resolver.AddSearchDirectory(game);
-        resolver.AddSearchDirectory(AppContext.BaseDirectory);
+        using var resolver = new GameAssemblyResolver(game, windowsDirectory);
         var report = new List<object>();
         foreach (string name in new[] { "Terraria.exe", "TerrariaServer.exe" })
         {

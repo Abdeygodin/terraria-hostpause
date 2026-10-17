@@ -1,0 +1,6 @@
+{
+  "platform": "Linux x64 self-contained installer",
+  "install_manifest_version": "0.1.1",
+  "install_hashes_verified": true,
+  "uninstall_restores_original_executables": true
+}

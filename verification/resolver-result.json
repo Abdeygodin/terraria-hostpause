@@ -1,0 +1,18 @@
+{
+  "passed": 10,
+  "checks": [
+    "Original .NET 8 resolver reproduces missing XNA Graphics",
+    "Resolve XNA Graphics by exact identity from Windows GAC_32",
+    "Do not substitute another XNA version",
+    "Resolve XNA from the legacy Windows assembly GAC_MSIL layout",
+    "Reject a DLL with a mismatched identity even at the expected GAC path",
+    "Patch official Windows Terraria 1.4.5.8 server using simulated Windows GAC",
+    "Windows source executable is unchanged",
+    "Patched Windows server references HostPause runtime",
+    "Linux client patch remains byte-identical to the verified 0.1.0 output",
+    "Linux server patch remains byte-identical to the verified 0.1.0 output"
+  ],
+  "windows_server": "official Terraria 1.4.5.8 download",
+  "environment": "Linux .NET 8; simulated Windows GAC using Wine Mono XNA facades",
+  "windows_gameplay_tested": false
+}

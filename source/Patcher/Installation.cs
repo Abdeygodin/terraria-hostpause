@@ -14,7 +14,7 @@ static class Installation
     }
     public sealed class Manifest
     {
-        public string Version { get; set; } = "0.1.0";
+        public string Version { get; set; } = "0.1.1";
         public string Backup { get; set; } = "";
         public List<Entry> Files { get; set; } = new();
     }
@@ -120,7 +120,7 @@ static class Installation
                 File.Delete(manifestPath);
                 throw;
             }
-            Console.WriteLine("Установлен HostPause 0.1.0. Пауза хоста: F9.\nПапка игры: " + game + "\nРезервная копия: " + backup);
+            Console.WriteLine("Установлен HostPause 0.1.1. Пауза хоста: F9.\nПапка игры: " + game + "\nРезервная копия: " + backup);
         }
         finally { if (Directory.Exists(temporary)) Directory.Delete(temporary, true); }
     }
