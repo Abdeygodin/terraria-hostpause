@@ -1,0 +1,68 @@
+Keybinds.Pause.DisplayName: Пауза / продолжить (хост)
+
+Configs: {
+	PauseConfig: {
+		DisplayName: HostPause
+
+		ResumeCountdown: {
+			Label: Отсчёт перед продолжением (секунды)
+			Tooltip:
+				'''
+				Сколько секунд идёт отсчёт после нажатия клавиши паузы на паузе.
+				Повторное нажатие во время отсчёта отменяет его. 0 — продолжить сразу.
+				'''
+		}
+
+		AnyPlayerCanPause: {
+			Label: Пауза доступна всем игрокам
+			Tooltip:
+				'''
+				Выключено: ставить и снимать паузу может только хост (игрок на компьютере сервера) и консоль сервера.
+				Включено: любой игрок. Пауза снимается, когда уходит последний игрок.
+				'''
+		}
+	}
+}
+
+Commands: {
+	Pause: Поставить игру на паузу или отменить отсчёт
+	Resume: Продолжить игру после отсчёта
+	Status: Состояние HostPause
+}
+
+Messages: {
+	NotReady: HostPause: сервер ещё не прислал состояние паузы. Подождите пару секунд.
+	ReadyController: HostPause готов. Ваша клавиша паузы: {0}.
+	ReadyUnbound: HostPause готов. Назначьте клавишу паузы: Настройки → Управление, раздел HostPause (предлагается F9). Пока работают команды /pause и /resume.
+	ReadyGuest: HostPause готов. Ставить паузу может хост.
+	Countdown: Продолжение через {0}…
+	CountdownCancelled: Отсчёт отменён. Пауза продолжается.
+	Resumed: Игра продолжена.
+	PausedSingle: ПАУЗА — {0} для продолжения.
+	PausedConsole: ПАУЗА: её поставил сервер. Продолжение — командой resume в консоли сервера.
+	PausedController: ПАУЗА. Продолжить: {0}.
+	PausedGuest: ПАУЗА. Продолжить игру может хост.
+	DeniedNotAllowed: Пауза доступна только хосту.
+	DeniedJoining: Сейчас кто-то подключается. Поставьте паузу, когда он войдёт.
+	DeniedConsole: Паузу поставил сервер: продолжить можно только командой resume в его консоли.
+	CaptionCountdown: Продолжение через {0}…
+	CaptionConsole: Пауза сервера — resume в консоли
+	CaptionController: "{0} — продолжить игру"
+	CaptionGuest: Пауза. Продолжить может хост
+	AlreadyPaused: игра уже на паузе.
+	NotPaused: игра не на паузе.
+	CountdownRunning: отсчёт уже идёт.
+	Status: "{0}; игроков {1}; отсчёт {2} с."
+	StatusRunning: игра идёт
+	StatusCountdown: продолжение через {0} с
+	StatusConsole: пауза (консоль)
+	StatusPlayer: пауза (хост)
+	ConsoleHelp: Команды: pause (пауза), resume (продолжить), hostpause (состояние).
+	ConsoleTakeOver: пауза теперь управляется консолью.
+	ConsoleTakeOverCountdown: отсчёт отменён, пауза теперь управляется консолью.
+	ConsoleJoining: пауза невозможна, пока игрок подключается. Повторите через пару секунд.
+	ConsolePaused: пауза. Новые игроки не смогут подключиться до команды resume.
+	ConsoleResuming: продолжение через {0} с.
+	Faulted: HostPause отключён из-за ошибки, пауза снята. Подробности в client.log.
+	VisualFault: HostPause: ошибка эффектов паузы. Пауза мира продолжает работать; подробности в client.log.
+}

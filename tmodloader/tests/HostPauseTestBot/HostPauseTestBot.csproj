@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Test-only automation for HostPause. Build like HostPause: inside ModSources, or with
+       dotnet build -p:tMLInstallDir=/path/to/tModLoader. Never publish it. -->
+  <Import Project="..\..\tModLoader.targets" Condition="'$(tMLInstallDir)' == ''" />
+  <Import Project="$(tMLInstallDir)/tMLMod.targets" Condition="'$(tMLInstallDir)' != ''" />
+
+  <PropertyGroup>
+    <AssemblyName>HostPauseTestBot</AssemblyName>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,6 @@
+displayName = HostPause Test Bot
+author = Abdeygodin
+version = 0.2.0
+side = Both
+modReferences = HostPause
+buildIgnore = *.csproj, obj\*, bin\*

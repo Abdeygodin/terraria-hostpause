@@ -1,0 +1,68 @@
+Keybinds.Pause.DisplayName: Pause / resume (host)
+
+Configs: {
+	PauseConfig: {
+		DisplayName: HostPause
+
+		ResumeCountdown: {
+			Label: Resume countdown (seconds)
+			Tooltip:
+				'''
+				Seconds counted down after the pause key is pressed during a pause.
+				Pressing the key again during the countdown cancels it. 0 resumes instantly.
+				'''
+		}
+
+		AnyPlayerCanPause: {
+			Label: Any player can pause
+			Tooltip:
+				'''
+				Off: only the host (the player on the server's machine) and the server console can pause and resume.
+				On: any player can. The pause is released when the last player leaves.
+				'''
+		}
+	}
+}
+
+Commands: {
+	Pause: Pause the game, or cancel the resume countdown
+	Resume: Resume the game after the countdown
+	Status: Show the HostPause state
+}
+
+Messages: {
+	NotReady: HostPause: the server has not sent the pause state yet. Wait a couple of seconds.
+	ReadyController: HostPause ready. Your pause key: {0}.
+	ReadyUnbound: HostPause ready. Bind the pause key in Settings → Controls, HostPause section (F9 suggested). Until then, use /pause and /resume.
+	ReadyGuest: HostPause ready. The host can pause the game.
+	Countdown: Resuming in {0}…
+	CountdownCancelled: Countdown cancelled. Still paused.
+	Resumed: The game resumed.
+	PausedSingle: PAUSED. Press {0} to resume.
+	PausedConsole: PAUSED by the server. It resumes with the resume command in the server console.
+	PausedController: PAUSED. Resume: {0}.
+	PausedGuest: PAUSED. The host can resume the game.
+	DeniedNotAllowed: Only the host can pause.
+	DeniedJoining: Someone is joining. Pause once they are in.
+	DeniedConsole: The server paused the game: only the resume command in its console can end this pause.
+	CaptionCountdown: Resuming in {0}…
+	CaptionConsole: Server pause. Type resume in the server console
+	CaptionController: "{0} to resume"
+	CaptionGuest: Paused. The host can resume
+	AlreadyPaused: the game is already paused.
+	NotPaused: the game is not paused.
+	CountdownRunning: the countdown is already running.
+	Status: "{0}; players {1}; countdown {2} s."
+	StatusRunning: running
+	StatusCountdown: resuming in {0} s
+	StatusConsole: paused (console)
+	StatusPlayer: paused (host)
+	ConsoleHelp: Commands: pause (пауза), resume (продолжить), hostpause (status).
+	ConsoleTakeOver: the pause is now controlled by the console.
+	ConsoleTakeOverCountdown: countdown cancelled; the pause is now controlled by the console.
+	ConsoleJoining: cannot pause while a player is joining. Try again in a few seconds.
+	ConsolePaused: paused. New players cannot join until the resume command.
+	ConsoleResuming: resuming in {0} s.
+	Faulted: HostPause was disabled by an error and the pause was released. See client.log.
+	VisualFault: HostPause: pause visuals failed. The world pause keeps working; see client.log.
+}

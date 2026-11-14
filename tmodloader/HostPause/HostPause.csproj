@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Inside ModSources, tModLoader provides ..\tModLoader.targets, which imports tMLMod.targets
+       from the installed tModLoader. Outside ModSources, pass the install folder instead:
+       dotnet build -p:tMLInstallDir=/path/to/tModLoader -->
+  <Import Project="..\tModLoader.targets" Condition="'$(tMLInstallDir)' == ''" />
+  <Import Project="$(tMLInstallDir)/tMLMod.targets" Condition="'$(tMLInstallDir)' != ''" />
+
+  <PropertyGroup>
+    <AssemblyName>HostPause</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+</Project>

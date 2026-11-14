@@ -1,0 +1,14 @@
+A real multiplayer pause controlled by the host.
+
+Bind the pause key in Settings > Controls (tModLoader leaves mod keys unbound; "Reset to default" gives F9). The host presses it to freeze the whole world for every player: time, enemies, projectiles, items, liquids, events and player actions. The screen turns gray with a pause banner. Press it again to resume after a short countdown; press it during the countdown to cancel. Until a key is bound, /pause and /resume in chat do the same.
+
+- Only the host can pause: the player on the server's machine (the Host & Play host). The server config can allow any player.
+- Dedicated server console: pause, resume, hostpause (status). A console pause can only be ended from the console.
+- Chat commands: /pause, /resume, /hostpause.
+- New players cannot join while the game is paused.
+- A host pause ends when the host leaves.
+- Works in single player too.
+
+Настоящая пауза для мультиплеера: хост нажимает клавишу паузы (назначается в Настройки > Управление, по умолчанию F9), и мир замирает у всех игроков. Повторное нажатие продолжает игру после отсчёта.
+
+Source and issues: https://github.com/Abdeygodin/terraria-hostpause

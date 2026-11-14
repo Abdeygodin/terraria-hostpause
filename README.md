@@ -8,6 +8,9 @@ It does not require tModLoader. A dedicated server can also be paused from its c
 
 [Русская инструкция](README_RU.md) · [Downloads](https://github.com/Abdeygodin/terraria-hostpause/releases)
 
+**Playing tModLoader?** The [tModLoader edition](tmodloader/README.md) does the same as a regular
+mod, without patching the game.
+
 ![Pause overlay captured in the actual Linux game client](docs/pause.png)
 
 ## Status

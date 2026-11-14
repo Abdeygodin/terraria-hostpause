@@ -1,0 +1,6 @@
+displayName = HostPause
+author = Abdeygodin
+version = 0.2.0
+side = Both
+homepage = https://github.com/Abdeygodin/terraria-hostpause
+buildIgnore = README.md, *.csproj, *.user, obj\*, bin\*, Properties\*, .vs\*

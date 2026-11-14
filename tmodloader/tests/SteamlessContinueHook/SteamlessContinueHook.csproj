@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Test bed only: a .NET startup hook (DOTNET_STARTUP_HOOKS) for tModLoader clients run
+       without Steam. It presses Continue on tML's "Steam Game Server failed to Init" notice,
+       which otherwise waits for a mouse click before mods load. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+</Project>
