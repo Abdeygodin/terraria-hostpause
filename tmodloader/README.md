@@ -14,7 +14,7 @@ Built and tested with tModLoader v2026.08.3 (the 1.4.4 stable branch).
 
 ## Install
 
-HostPause is not on the Steam Workshop yet. Once it is published:
+HostPause is on the Steam Workshop: [HostPause](https://steamcommunity.com/sharedfiles/filedetails/?id=3839806721). To install it:
 
 1. In tModLoader open **Workshop → Download Mods**, search for **HostPause**, download it,
    then enable it in **Workshop → Manage Mods** and reload.
@@ -166,7 +166,7 @@ Never publish them.
 
 ### Установка
 
-Мод ещё не опубликован в Мастерской Steam. После публикации:
+Мод опубликован в Мастерской Steam: [HostPause](https://steamcommunity.com/sharedfiles/filedetails/?id=3839806721). Установка:
 
 1. В tModLoader: **Мастерская → Загрузить моды**, найдите **HostPause**, скачайте, включите
    в **Управлении модами** и перезагрузите моды.

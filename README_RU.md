@@ -15,7 +15,7 @@
 [Скачать предварительный выпуск](https://github.com/Abdeygodin/terraria-hostpause/releases/tag/v0.2.0)
 
 **Играете в tModLoader?** [Версия для tModLoader](tmodloader/README.md#по-русски) делает то же самое
-обычным модом, без патча игры.
+обычным модом, без патча игры. Скачать: [Мастерская Steam](https://steamcommunity.com/sharedfiles/filedetails/?id=3839806721).
 
 ## Что нового в 0.2.0
 
