@@ -71,15 +71,15 @@ namespace HostPause
             drawn = false;
         }
 
-        public static bool DrawCached(string key)
+        public static bool DrawCached(string caption, bool emphasize)
         {
             if (frozen == null) return false;
-            Draw(key);
+            Draw(caption, emphasize);
             drawn = true;
             return true;
         }
 
-        public static void CaptureAndDraw(string key)
+        public static void CaptureAndDraw(string caption, bool emphasize)
         {
             if (drawn) { drawn = false; return; }
             object device = Device;
@@ -109,12 +109,12 @@ namespace HostPause
                     bannerWidth = PropertyInt(banner, "Width"); bannerHeight = PropertyInt(banner, "Height");
                 }
             }
-            Draw(key);
+            Draw(caption, emphasize);
         }
 
         static object Rectangle(int x, int y, int width, int height) { return Activator.CreateInstance(rectangleType, new object[] { x, y, width, height }); }
 
-        static void Draw(string key)
+        static void Draw(string caption, bool emphasize)
         {
             object device = Device, batch = Field("spriteBatch");
             PropertyInfo viewportProperty = device.GetType().GetProperty("Viewport");
@@ -134,7 +134,8 @@ namespace HostPause
                 int x = (width - bw) / 2, y = (height - bh) / 2;
                 drawRect.Invoke(batch, new object[] { banner, Rectangle(x, y, bw, bh), white });
                 object position = Activator.CreateInstance(vectorType, new object[] { width / 2f, y + bh + 14f });
-                text.Invoke(null, new object[] { batch, "Хост: " + key + " — продолжить игру", position, white, Math.Max(0.75f, Math.Min(width / 1600f, 1.15f)), 0.5f, 0f, -1 });
+                float scale = Math.Max(0.75f, Math.Min(width / 1600f, 1.15f)) * (emphasize ? 1.6f : 1f);
+                text.Invoke(null, new object[] { batch, caption, position, white, scale, 0.5f, 0f, -1 });
             }
             finally
             {

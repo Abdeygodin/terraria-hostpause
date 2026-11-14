@@ -9,14 +9,16 @@ static class Program
     {
         try
         {
-            if (args.Length >= 1 && (args[0] == "install" || args[0] == "uninstall"))
+            if (args.Length >= 1 && (args[0] == "install" || args[0] == "uninstall" || args[0] == "status"))
             {
                 string game = Installation.FindGame(args.Length > 1 ? args[1] : null);
-                if (args[0] == "install") Installation.Install(game); else Installation.Uninstall(game);
+                if (args[0] == "install") Installation.Install(game);
+                else if (args[0] == "uninstall") Installation.Uninstall(game);
+                else Installation.Status(game);
                 return 0;
             }
             if (args.Length != 3 || args[0] != "prepare")
-                throw new ArgumentException("Usage: HostPause.Patcher install|uninstall [Terraria directory]\n       HostPause.Patcher prepare <Terraria directory> <output directory>");
+                throw new ArgumentException("Usage: HostPause.Patcher install|uninstall|status [Terraria directory]\n       HostPause.Patcher prepare <Terraria directory> <output directory>");
             Prepare(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]));
             return 0;
         }
@@ -29,7 +31,8 @@ static class Program
         catch (Exception ex) { Console.Error.WriteLine(ex.Message); return 1; }
     }
 
-    internal static void Prepare(string game, string output, string? windowsDirectory = null)
+    // inputs: where to read the original executables from (default: the game directory).
+    internal static void Prepare(string game, string output, string? windowsDirectory = null, string? inputs = null)
     {
         if (game.TrimEnd(Path.DirectorySeparatorChar) == output.TrimEnd(Path.DirectorySeparatorChar))
             throw new Exception("Use a separate staging directory; original files are never patched in place.");
@@ -41,7 +44,7 @@ static class Program
         var report = new List<object>();
         foreach (string name in new[] { "Terraria.exe", "TerrariaServer.exe" })
         {
-            string input = Path.Combine(game, name), destination = Path.Combine(output, name);
+            string input = Path.Combine(inputs ?? game, name), destination = Path.Combine(output, name);
             if (!File.Exists(input)) continue;
             if (File.Exists(destination)) throw new Exception("Output exists: " + destination);
             using var module = ModuleDefinition.ReadModule(input, new ReaderParameters { AssemblyResolver = resolver });
@@ -98,6 +101,12 @@ static class Program
                     Instruction.Create(OpCodes.Brfalse, originalFirst), Instruction.Create(OpCodes.Ret));
             }
 
+            // Dedicated server console: HostPause reads input lines first and consumes its own commands.
+            var readLine = main.Methods.Single(m => m.Name == "ReadLineInput" && m.Parameters.Count == 0);
+            var consoleCalls = readLine.Body.Instructions.Where(i => i.Operand is MethodReference r && r.DeclaringType.FullName == "System.Console" && r.Name == "ReadLine").ToList();
+            if (consoleCalls.Count != 1) throw new Exception("Server console input does not match the verified 1.4.5.8 layout.");
+            consoleCalls[0].Operand = module.ImportReference(type.Methods.Single(m => m.Name == "ReadConsoleLine"));
+
             var f9 = main.Methods.Single(m => m.Name == "DoUpdate_F9_ToggleLighting");
             var f9First = f9.Body.Instructions[0];
             InsertBefore(f9.Body.GetILProcessor(), f9First,
@@ -111,13 +120,13 @@ static class Program
             int hooks = verify.GetType("Terraria.Main").Methods.SelectMany(m => m.HasBody ? m.Body.Instructions : Enumerable.Empty<Instruction>())
                 .Concat(verify.GetType("Terraria.MessageBuffer").Methods.SelectMany(m => m.HasBody ? m.Body.Instructions : Enumerable.Empty<Instruction>()))
                 .Count(i => i.Operand is MethodReference r && r.DeclaringType.FullName == "HostPause.Runtime");
-            if (hooks != (draw != null ? 6 : 4)) throw new Exception("Hook verification failed.");
+            if (hooks != (draw != null ? 7 : 5)) throw new Exception("Hook verification failed.");
             report.Add(new { file = name, version = module.Assembly.Name.Version.ToString(), originalSha256 = Hash(input), patchedSha256 = Hash(destination), hooks });
         }
         if (report.Count == 0) throw new Exception("No Terraria executables found.");
         File.Copy(runtimePath, Path.Combine(output, "HostPause.Runtime.dll"));
         File.Copy(Path.Combine(AppContext.BaseDirectory, "HostPause.banner.png"), Path.Combine(output, "HostPause.banner.png"));
-        File.WriteAllText(Path.Combine(output, "HostPause.key.txt"), "F9\n");
+        File.WriteAllText(Path.Combine(output, Installation.ConfigName), Installation.DefaultConfig);
         File.WriteAllText(Path.Combine(output, "patch-report.json"), JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true }));
         Console.WriteLine(JsonSerializer.Serialize(report, new JsonSerializerOptions { WriteIndented = true }));
     }

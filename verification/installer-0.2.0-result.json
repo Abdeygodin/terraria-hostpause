@@ -1,0 +1,18 @@
+{
+  "passed": 13,
+  "checks": [
+    "Previous 0.1.2 release installed in the fixture",
+    "Installing 0.2.0 over 0.1.2 upgrades in place",
+    "Customised 0.1.x key moves into HostPause.config.txt",
+    "status reports an active patch",
+    "status detects executables replaced by Steam",
+    "Install repairs the patch after a Steam replacement",
+    "Repair keeps the edited settings",
+    "Uninstall after a partial Steam replacement leaves Steam's file alone",
+    "Uninstall removes the manifest and runtime",
+    "Uninstall keeps edited settings for a later install",
+    "Every original game file is byte-identical after uninstall",
+    "Unedited default settings are removed on uninstall",
+    "Uninstall without an installation fails clearly"
+  ]
+}

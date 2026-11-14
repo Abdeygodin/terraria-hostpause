@@ -33,7 +33,7 @@ class Program
         Check(Runtime.BeforeSimulation(new FakeGame()), "Simulation gate remains closed after a graphical failure");
         Check(!Runtime.DrawFrozenFrame() && Runtime.IsPaused, "Disabling visuals leaves authoritative pause active");
         var buffer = new FakeBuffer();
-        byte[] state = { 254, (byte)'H', (byte)'P', (byte)'Z', (byte)'1', 2, 2, 0, 2, 0, 0, 0 };
+        byte[] state = { 254, (byte)'H', (byte)'P', (byte)'Z', (byte)'1', 3, 2, 0, 1, 0, 2, 0, 0, 0 };
         Array.Copy(state, buffer.readBuffer, state.Length);
         int messageType;
         Check(Runtime.HandlePacket(buffer, 0, state.Length, out messageType) && !Runtime.IsPaused,

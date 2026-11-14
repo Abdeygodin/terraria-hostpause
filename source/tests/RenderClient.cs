@@ -12,7 +12,7 @@ public static class HostPauseRenderClient
     static int overlays;
     static uint frozenTick;
     static double frozenTime;
-    static long started;
+    static long started, resumePressed, resumedAt;
     static readonly bool guest = Environment.GetEnvironmentVariable("HOSTPAUSE_RENDER_ROLE") == "guest";
     static readonly bool injectCaptureFailure = Environment.GetEnvironmentVariable("HOSTPAUSE_TEST_CAPTURE_FAILURE") == "1";
     static bool failureInjected;
@@ -58,6 +58,7 @@ public static class HostPauseRenderClient
         connectedFrames++;
         bool press = false;
         if (!guest && !requested && connectedFrames == 120) { requested = true; press = true; Log("PRESS F9: pause at frame " + frames); }
+        if (!HostPause.Runtime.IsPaused && pausedFrames > 0 && resumedAt == 0) resumedAt = DateTime.UtcNow.Ticks;
         if (HostPause.Runtime.IsPaused)
         {
             pausedFrames++;
@@ -73,6 +74,7 @@ public static class HostPauseRenderClient
             {
                 if (Main.GameUpdateCount != frozenTick || Main.time != frozenTime) throw new Exception("Client simulation moved during pause");
                 press = !guest;
+                if (press) resumePressed = DateTime.UtcNow.Ticks;
                 if (guest) File.WriteAllText("../test-data/guest-frozen.signal", "frozen");
                 Log(guest ? "PASS: graphical guest simulation frozen despite screenshot failure" : "PASS: actual FNA client simulation frozen; PRESS F9: resume");
             }
@@ -82,6 +84,12 @@ public static class HostPauseRenderClient
             done = true;
             if (guest && pausedFrames < 150) throw new Exception("Guest resumed locally before authoritative resume");
             if (Main.GameUpdateCount == frozenTick) throw new Exception("Client did not resume");
+            if (!guest)
+            {
+                // HostPause.config.txt in the test bed sets countdown=2: resume must wait for it.
+                double waited = (resumedAt - resumePressed) / (double)TimeSpan.TicksPerMillisecond;
+                Log((waited >= 1500 ? "PASS: countdown kept the client paused for " : "FAIL: resumed too early, after ") + (int)waited + " ms");
+            }
             Log(guest ? "PASS: server resume reached graphical guest after screenshot failure" : "PASS: actual F9 resumed client simulation; captured=" + captured);
             Main.instance.Exit();
         }
@@ -98,6 +106,19 @@ public static class HostPauseRenderClient
         int height = device.PresentationParameters.BackBufferHeight;
         Color[] pixels = new Color[width*height];
         device.GetBackBufferData(pixels);
+        if (!guest)
+        {
+            // Everything outside the centred banner is the desaturated frozen frame.
+            int gray = 0, total = 0;
+            for (int y = 0; y < height / 6; y += 3)
+                for (int x = 0; x < width; x += 3)
+                {
+                    Color c = pixels[y * width + x];
+                    total++;
+                    if (Math.Abs(c.R - c.G) <= 2 && Math.Abs(c.G - c.B) <= 2) gray++;
+                }
+            Log((gray >= total * 98 / 100 ? "PASS: captured pause frame is grayscale " : "FAIL: pause frame is not grayscale ") + gray + "/" + total);
+        }
         using (var image = new Texture2D(device, width, height))
         {
             image.SetData(pixels);

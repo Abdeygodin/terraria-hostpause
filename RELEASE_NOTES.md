@@ -1,44 +1,41 @@
-# HostPause 0.1.2 — keep every client paused after a graphics failure
+# HostPause 0.2.0 — resume countdown, server console, Steam-proof installer
 
-Fixes a client-side bug where a screenshot/overlay error could disable all hooks,
-letting that client move and simulate enemies while the server and other players
-remained paused. Windows XNA Reach blocks normal backbuffer readback, making it
-susceptible to this failure path.
+- **Resume countdown.** F9 during a pause starts a countdown (3 s by default) before the
+  world moves again; F9 during the countdown cancels it. Leaving as host still releases
+  the pause immediately.
+- **Dedicated server console:** `pause`, `resume`, `hostpause`. Works on an empty server.
+  A console pause survives the host leaving, and only the console can end it.
+- **Who paused** is shown to every player; pause, resume and countdown play sounds.
+  Guests no longer see their own key presented as the host's.
+- **No desync at the pause edge.** Gameplay a client sent before it learned of the pause
+  is applied on the server (clients acknowledge the pause; only later packets are dropped).
+- **Settings:** `HostPause.config.txt` with `key` and `countdown`. A 0.1.x
+  `HostPause.key.txt` is migrated on upgrade.
+- **Installer:** `status` command; Install over an earlier version upgrades in place and
+  patches the originals before touching the old install; after a Steam update or file
+  verification, Install repairs and Uninstall cleans up without touching Steam's files;
+  edited settings are kept; a game folder moved by Steam still finds its backups.
+- Fixes: a host whose patch fails now releases the server pause at once; a cancel press
+  is never rate-limited; the countdown uses a monotonic clock; console commands sent in a
+  burst all run; server startup prompts are never mistaken for commands.
 
-- Rendering errors now disable only pause effects. The client simulation stays
-  frozen, networking continues, and the server can resume it normally.
-- XNA Reach screenshot capture temporarily lifts only the readback capability,
-  restoring it even on exceptions. The graphics profile and settings are unchanged.
-- Protocol 2 refuses pause with old 0.1.0/0.1.1 runtimes instead of silently mixing
-  clients with the vulnerable error handler.
-- `HostPause.log` beside the game executable records version, handshake, received
-  states, and faults. No player names, Steam IDs, or host tokens are logged.
-- The Windows XNA dependency discovery fix from 0.1.1 is retained.
+**Update every participant, host, and server.** Protocol 3 refuses shared pause with
+0.1.x. Close Terraria and its server, extract **HostPause-0.2.0.zip** into a new folder,
+and run Install on each PC — the earlier version is replaced automatically.
 
-**Update every participant, host, and server.** Download **HostPause-0.1.2.zip**
-and extract it into a new folder. Close Terraria and its server, run the previous
-Uninstall script, then the new Install script on each PC. If the earlier install
-failed during XNA resolution, no uninstall is needed. Wait for the
-**HostPause 0.1.2 готов** message after reconnecting, then use **F9** as host.
-
-Validation: 20 real Linux server checks, including a 125-second pause and old
-protocol rejection; F9 pause/resume in the graphical host; a graphical guest with
-an intentionally broken capture that remains frozen until server resume; seven
-focused graphics-failure regressions. The game is still limited to Terraria 1.4.5.8.
-Windows gameplay and the full Steam friend connection path need live verification.
-This remains an experimental prerelease.
+Validation (Linux only): 31 server integration checks; live console, takeover and burst
+checks; a graphical host that verifies the countdown and the grayscale frame; a graphical
+guest with a forced capture failure; installer lifecycle from the real 0.1.2 release;
+graphics-failure regressions. Windows gameplay and Steam friend connections still need
+live verification. This remains an experimental prerelease limited to Terraria 1.4.5.8.
 
 ---
 
-Исправлен случай, когда из-за ошибки картинки паузы клиент продолжал ходить и
-обновлять врагов. Теперь ошибка графики отключает только эффекты, а пауза
-симуляции и сетевые команды продолжают работать. Добавлен обход ограничения
-чтения кадра XNA Reach с обязательным восстановлением флага.
+**F9 во время паузы запускает отсчёт перед продолжением**, повторное F9 отменяет его.
+Выделенный сервер ставится на паузу командами `pause` / `resume` в консоли. Игроки видят,
+кто поставил паузу. Действия, сделанные за мгновение до паузы, больше не теряются.
+Настройки — в `HostPause.config.txt`. Установщик понимает обновления Steam: `status`
+показывает, работает ли патч, а повторный Install восстанавливает его.
 
-**Обновиться до 0.1.2 нужно всем, включая хоста и сервер.** Закройте игру,
-удалите старый патч через Uninstall, распакуйте **HostPause-0.1.2.zip** в новую
-папку и выполните Install. Со старыми версиями совместная пауза не включается.
-После подключения дождитесь **HostPause 0.1.2 готов**, затем хост нажимает F9.
-
-В случае повторения проблемы приложите `HostPause.log` из папок игры хоста и
-проблемного клиента. Windows и полная связка через Steam ещё требуют проверки.
+**Обновиться до 0.2.0 нужно всем, включая хоста и сервер.** Закройте игру, распакуйте
+**HostPause-0.2.0.zip** в новую папку и выполните Install — прошлая версия заменится сама.

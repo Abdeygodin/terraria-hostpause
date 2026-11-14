@@ -1,0 +1,23 @@
+{
+  "passed": 18,
+  "checks": [
+    "full server integration (integration-result.json)",
+    "Console pause reaches players and names the server as the source",
+    "Players cannot resume a console pause",
+    "hostpause console command reports the state",
+    "Console resume starts the countdown",
+    "Console resume finishes after the countdown",
+    "Console pause works on an empty server",
+    "Joining a console-paused empty server is refused with a message",
+    "Empty server resumes from the console without any connected player",
+    "The host cannot resume a console pause",
+    "Console resume ends it",
+    "Host pause on the same server",
+    "Console pause takes over a host pause",
+    "A taken-over pause survives the host leaving",
+    "Server runs again after console resume",
+    "Console commands sent in one burst all run in order",
+    "graphical host F9 pause, countdown resume and grayscale screenshot",
+    "graphical guest stays frozen after capture failure and resumes only with server"
+  ]
+}

@@ -66,7 +66,7 @@ class Client:
         self.sock.sendall(struct.pack('<HB', len(payload)+3, kind)+payload)
 
     def pause(self, op, value=0, revision=None):
-        self.send(254, b'HPZ1'+bytes([2, op, value])+struct.pack('<I', self.revision if revision is None else revision))
+        self.send(254, b'HPZ1'+bytes([3, op, value, 0, 0])+struct.pack('<I', self.revision if revision is None else revision))
 
     def read(self):
         try:
@@ -86,11 +86,16 @@ class Client:
             self.buf = self.buf[length:]
             self.counts[kind] += 1
             packets.append((kind, body))
-            if kind == 254 and body[:5] == b'HPZ1\x02':
-                op, value, revision = struct.unpack('<BBI', body[5:])
+            if kind == 254 and body[:5] == b'HPZ1\x03':
+                op, value, source, countdown, revision = struct.unpack('<BBBBI', body[5:])
                 if op == 2:
+                    was_paused = bool(self.states) and self.states[-1][0] == 1
                     self.revision = revision
-                    self.states.append((value, revision, time.monotonic()))
+                    # (paused, revision, time, source: 1 host / 2 console, countdown seconds)
+                    self.states.append((value, revision, time.monotonic(), source, countdown))
+                    if value == 1 and not was_paused:
+                        # Like the runtime: acknowledge the pause; later gameplay packets are dropped.
+                        self.send(254, b'HPZ1'+bytes([3, 5, 1, 0, 0])+struct.pack('<I', revision))
                 elif op == 4:
                     self.denied.append(value)
         return packets
